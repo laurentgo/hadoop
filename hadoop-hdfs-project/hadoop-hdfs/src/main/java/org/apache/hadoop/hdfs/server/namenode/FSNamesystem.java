@@ -3136,7 +3136,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
    */
   LocatedBlock storeAllocatedBlock(String src, long fileId, String clientName,
       ExtendedBlock previous, DatanodeStorageInfo[] targets) throws IOException {
-    BlockInfo newBlockInfo = null;
+    Block newBlock = null;
     long offset;
     checkOperation(OperationCategory.WRITE);
     waitForLoadingFSImage();
@@ -3169,8 +3169,8 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
                                 ExtendedBlock.getLocalBlock(previous));
 
       // allocate new block, record block locations in INode.
-      Block newBlock = createNewBlock(isStriped);
-      newBlockInfo = saveAllocatedBlock(src, fileState.iip, newBlock, targets,
+      newBlock = createNewBlock(isStriped);
+      saveAllocatedBlock(src, fileState.iip, newBlock, targets,
           isStriped);
 
       persistNewBlock(src, pendingFile);
@@ -3181,7 +3181,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
     getEditLog().logSync();
 
     // Return located block
-    return makeLocatedBlock(newBlockInfo, targets, offset);
+    return makeLocatedBlock(getStoredBlock(newBlock), targets, offset);
   }
 
   /*
