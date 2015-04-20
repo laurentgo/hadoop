@@ -1854,6 +1854,7 @@ class NameNodeRpcServer implements NamenodeProtocols {
     boolean success = false;
     try {
       namesystem.createErasureCodingZone(src, schema, cacheEntry != null);
+      success = true;
     } finally {
       RetryCache.setState(cacheEntry, success);
     }
