@@ -2573,21 +2573,22 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
   }
   
   /** 
-   * Creates a new DocumentBuilderFactory instance using the same classloader as 
-   * Configuration, since JAXP uses the context classloader by default.
+   * Creates a new DocumentBuilderFactory instance using the same classloader 
+   * as Configuration, since JAXP uses the context classloader by default.
    */
   private static DocumentBuilderFactory newDocumentBuilderFactoryInstance() {
-      // Java doesn't provide a way to find the default XML parser in a given 
-      // classloader. Instead we have to change and restore the context classloader.
-      Thread currentThread = Thread.currentThread();
-      ClassLoader oldCCL = currentThread.getContextClassLoader();
-      currentThread.setContextClassLoader(Configuration.class.getClassLoader());
+    // Java doesn't provide a way to find the default XML parser in a given 
+    // classloader. Instead we have to change and restore the context 
+    // classloader.
+    Thread currentThread = Thread.currentThread();
+    ClassLoader oldCCL = currentThread.getContextClassLoader();
+    currentThread.setContextClassLoader(Configuration.class.getClassLoader());
 
-      try {
-        return DocumentBuilderFactory.newInstance();
-      } finally {
-        currentThread.setContextClassLoader(oldCCL);
-      }
+    try {
+      return DocumentBuilderFactory.newInstance();
+    } finally {
+      currentThread.setContextClassLoader(oldCCL);
+    }
   }
 
   private Resource loadResource(Properties properties, Resource wrapper, boolean quiet) {
