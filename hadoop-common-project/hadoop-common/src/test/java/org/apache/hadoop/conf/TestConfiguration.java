@@ -29,9 +29,11 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -1509,6 +1511,45 @@ public class TestConfiguration extends TestCase {
     }
     // If this test completes without going into infinite loop,
     // it's expected behaviour.
+  }
+
+  /**
+   * A test to confirm that XML read/write doesn't use 
+   * the context classloader
+   */
+  public void testClassloaderIsolation() throws IOException {
+    Thread currentThread = Thread.currentThread();
+    ClassLoader oldCCL = currentThread.getContextClassLoader();
+    ClassLoader forbiddenCL = new ClassLoader() {
+      private final String JAXP_SERVICE = 
+          "META-INF/services/javax.xml.parsers.DocumentBuilderFactory";
+
+      @Override
+      protected URL findResource(String name) {
+        if (JAXP_SERVICE.equals(name)) {
+          fail("This classloader should not be used.");
+        }
+        return null;
+      }
+
+
+      @Override
+      protected Enumeration<URL> findResources(String name) {
+        if (JAXP_SERVICE.equals(name)) {
+          fail("This classloader should not be used.");
+        }
+        return null;
+      }
+    };
+
+    currentThread.setContextClassLoader(forbiddenCL);
+    try {
+      Configuration conf = new Configuration();
+      ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+      conf.writeXml(baos);
+    } finally {
+      currentThread.setContextClassLoader(oldCCL);
+    }
   }
 
   public static void main(String[] argv) throws Exception {
